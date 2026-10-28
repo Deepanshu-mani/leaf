@@ -1,0 +1,8 @@
+{
+  "name": "bookleaf-author-support",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Author Support & Communication Portal for BookLeaf Publishing",
+  "scripts": {"start": "node server.js", "dev": "node --watch server.js"},
+  "engines": {"node": ">=18"}
+}

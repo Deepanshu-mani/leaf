@@ -1,0 +1,227 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum UserRole {
+  AUTHOR
+  ADMIN
+}
+
+enum TicketStatus {
+  OPEN        @map("Open")
+  IN_PROGRESS @map("In Progress")
+  RESOLVED    @map("Resolved")
+  CLOSED      @map("Closed")
+}
+
+// Declaration order is the queue's severity order in PostgreSQL.
+enum TicketPriority {
+  CRITICAL @map("Critical")
+  HIGH     @map("High")
+  MEDIUM   @map("Medium")
+  LOW      @map("Low")
+}
+
+enum TicketCategory {
+  ROYALTY_PAYMENTS  @map("Royalty & Payments")
+  ISBN_METADATA     @map("ISBN & Metadata Issues")
+  PRINTING_QUALITY  @map("Printing & Quality")
+  DISTRIBUTION      @map("Distribution & Availability")
+  PRODUCTION_STATUS @map("Book Status & Production Updates")
+  GENERAL_INQUIRY   @map("General Inquiry")
+}
+
+enum ClassificationSource {
+  RULES
+  GEMINI
+  ADMIN
+}
+
+enum DistributionChannel {
+  AMAZON_INDIA   @map("Amazon India")
+  FLIPKART       @map("Flipkart")
+  AMAZON_US      @map("Amazon US")
+  AMAZON_UK      @map("Amazon UK")
+  BOOKLEAF_STORE @map("BookLeaf Store")
+}
+
+enum TicketActivityType {
+  CREATED
+  STATUS_CHANGED
+  CATEGORY_CHANGED
+  PRIORITY_CHANGED
+  ASSIGNED
+  UNASSIGNED
+  REPLY_SENT
+  INTERNAL_NOTE_ADDED
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  name         String
+  passwordHash String   @map("password_hash")
+  role         UserRole @default(AUTHOR)
+  isActive     Boolean  @default(true) @map("is_active")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  author          Author?
+  sessions        AuthSession[]
+  assignedTickets Ticket[]         @relation("TicketAssignee")
+  sentMessages    TicketMessage[]
+  internalNotes   TicketNote[]
+  activities      TicketActivity[]
+
+  @@index([role, isActive])
+  @@map("users")
+}
+
+model AuthSession {
+  id        String   @id @default(cuid())
+  tokenHash String   @unique @map("token_hash")
+  userId    String   @map("user_id")
+  expiresAt DateTime @map("expires_at")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, expiresAt])
+  @@map("auth_sessions")
+}
+
+model Author {
+  id         String    @id @map("author_id")
+  userId     String    @unique @map("user_id")
+  phone      String?
+  city       String?
+  joinedDate DateTime? @map("joined_date") @db.Date
+  createdAt  DateTime  @default(now()) @map("created_at")
+
+  user    User     @relation(fields: [userId], references: [id], onDelete: Restrict)
+  books   Book[]
+  tickets Ticket[]
+
+  @@map("authors")
+}
+
+model Book {
+  id                    String    @id @map("book_id")
+  authorId              String    @map("author_id")
+  title                 String
+  isbn                  String    @unique
+  genre                 String
+  publicationDate       DateTime? @map("publication_date") @db.Date
+  status                String
+  mrp                   Decimal?  @db.Decimal(10, 2)
+  authorRoyaltyPerCopy  Decimal?  @map("author_royalty_per_copy") @db.Decimal(10, 2)
+  totalCopiesSold       Int       @default(0) @map("total_copies_sold")
+  totalRoyaltyEarned    Decimal   @default(0) @map("total_royalty_earned") @db.Decimal(12, 2)
+  royaltyPaid           Decimal   @default(0) @map("royalty_paid") @db.Decimal(12, 2)
+  royaltyPending        Decimal   @default(0) @map("royalty_pending") @db.Decimal(12, 2)
+  lastRoyaltyPayoutDate DateTime? @map("last_royalty_payout_date") @db.Date
+  printPartner          String?   @map("print_partner")
+  createdAt             DateTime  @default(now()) @map("created_at")
+  updatedAt             DateTime  @updatedAt @map("updated_at")
+
+  author       Author             @relation(fields: [authorId], references: [id], onDelete: Restrict)
+  availability BookAvailability[]
+  tickets      Ticket[]
+
+  @@index([authorId, status])
+  @@map("books")
+}
+
+model BookAvailability {
+  bookId    String              @map("book_id")
+  channel   DistributionChannel
+  createdAt DateTime            @default(now()) @map("created_at")
+
+  book Book @relation(fields: [bookId], references: [id], onDelete: Cascade)
+
+  @@id([bookId, channel])
+  @@index([channel])
+  @@map("book_availability")
+}
+
+model Ticket {
+  id             String               @id @default(cuid())
+  authorId       String               @map("author_id")
+  bookId         String?              @map("book_id")
+  subject        String               @db.VarChar(120)
+  description    String               @db.Text
+  category       TicketCategory
+  priority       TicketPriority       @default(MEDIUM)
+  status         TicketStatus         @default(OPEN)
+  categorySource ClassificationSource @default(RULES) @map("category_source")
+  prioritySource ClassificationSource @default(RULES) @map("priority_source")
+  aiCategory     TicketCategory?      @map("ai_category")
+  aiPriority     TicketPriority?      @map("ai_priority")
+  aiReason       String?              @map("ai_reason") @db.Text
+  aiModel        String?              @map("ai_model")
+  aiClassifiedAt DateTime?            @map("ai_classified_at")
+  assignedToId   String?              @map("assigned_to_id")
+  createdAt      DateTime             @default(now()) @map("created_at")
+  updatedAt      DateTime             @updatedAt @map("updated_at")
+
+  author     Author           @relation(fields: [authorId], references: [id], onDelete: Restrict)
+  book       Book?            @relation(fields: [bookId], references: [id], onDelete: SetNull)
+  assignedTo User?            @relation("TicketAssignee", fields: [assignedToId], references: [id], onDelete: SetNull)
+  messages   TicketMessage[]
+  notes      TicketNote[]
+  activities TicketActivity[]
+
+  @@index([status, priority, createdAt])
+  @@index([category, status, createdAt])
+  @@index([authorId, createdAt])
+  @@index([assignedToId, status, createdAt])
+  @@map("tickets")
+}
+
+model TicketMessage {
+  id        String   @id @default(cuid())
+  ticketId  String   @map("ticket_id")
+  senderId  String   @map("sender_id")
+  body      String   @db.Text
+  createdAt DateTime @default(now()) @map("created_at")
+
+  ticket Ticket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  sender User   @relation(fields: [senderId], references: [id], onDelete: Restrict)
+
+  @@index([ticketId, createdAt])
+  @@map("ticket_messages")
+}
+
+model TicketNote {
+  id        String   @id @default(cuid())
+  ticketId  String   @map("ticket_id")
+  authorId  String   @map("author_id")
+  body      String   @db.Text
+  createdAt DateTime @default(now()) @map("created_at")
+
+  ticket Ticket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  author User   @relation(fields: [authorId], references: [id], onDelete: Restrict)
+
+  @@index([ticketId, createdAt])
+  @@map("ticket_notes")
+}
+
+model TicketActivity {
+  id        String             @id @default(cuid())
+  ticketId  String             @map("ticket_id")
+  actorId   String?            @map("actor_id")
+  type      TicketActivityType
+  details   Json?
+  createdAt DateTime           @default(now()) @map("created_at")
+
+  ticket Ticket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  actor  User?  @relation(fields: [actorId], references: [id], onDelete: SetNull)
+
+  @@index([ticketId, createdAt])
+  @@map("ticket_activities")
+}

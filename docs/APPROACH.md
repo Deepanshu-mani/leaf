@@ -1,0 +1,9 @@
+# BookLeaf Portal — Approach
+
+I prioritized the complete author-to-support loop: authors can see their own catalog and royalty figures, submit a contextual question, and follow support replies; the operations team can triage a shared inbox, edit category and priority, assign ownership, add private notes, and send reviewed responses. The supplied author and book records are loaded directly, including books in production and titles with no sales or payouts.
+
+The demo uses a dependency-light Node REST server and a persistent local JSON store so it starts with one command. This keeps the workflow easy to inspect while leaving the API boundaries clear for a database-backed version. The API protects routes with role checks, validates ticket input, and returns actionable error messages. Server-sent events deliver ticket changes to the author who owns the ticket and the admin queue.
+
+AI response drafting uses a server-side OpenAI call with a compact policy summary and only the selected ticket and relevant book facts. The API key stays in the server environment. Ticket creation and classification do not depend on the model. If the provider is unavailable, a policy-based category draft is still offered and the admin can edit or write a reply manually. Classification and urgency scoring use deterministic rules that admins can override.
+
+The key trade-offs are intentionally visible: demo credentials replace production identity, JSON storage replaces a relational database, file selection is a UI-only preview, and classification is rule-based. With more time, I would add PostgreSQL migrations, secure account provisioning and sessions, audit history, actual attachment storage, operational monitoring, and an evaluation set to measure classification quality and response factuality before deployment.
