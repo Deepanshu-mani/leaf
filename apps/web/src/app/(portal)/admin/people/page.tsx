@@ -36,7 +36,7 @@ export default async function AdminPeoplePage() {
   const inactiveCount = people.filter((person) => !person.isActive).length;
   return <>
     <div className="pagehead"><div><div className="eyebrow">BOOKLEAF OPERATIONS</div><h1>People</h1><p>{currentUser.isSuperAdmin ? "Manage access, invite people, and oversee your publishing community." : "View your publishing community and internal team."}</p></div></div>
-    <div className="stat-grid"><Stat icon={<UserRound />} label="Authors" value={authorCount} sub="Author accounts" /><Stat icon={<UsersRound />} label="Admins" value={teamCount} sub="Including the super admin" /><Stat icon={<BookOpen />} label="Active accounts" value={people.length - inactiveCount} sub="Across the directory" /><Stat icon={<Headset />} label="Support tickets" value={people.reduce((sum, person) => sum + person.tickets, 0)} sub="Submitted by authors" /></div>
+    <div className="stat-grid"><Stat icon={<UserRound />} label="Authors" value={authorCount} sub="Author accounts" /><Stat icon={<UsersRound />} label="Team members" value={teamCount} sub="Internal support team" /><Stat icon={<BookOpen />} label="Active accounts" value={people.length - inactiveCount} sub="Across the directory" /><Stat icon={<Headset />} label="Support tickets" value={people.reduce((sum, person) => sum + person.tickets, 0)} sub="Submitted by authors" /></div>
     {currentUser.isSuperAdmin && <AdminInvitePanel initialInvites={pendingInvites.map((invite) => ({ ...invite, role: invite.role as "ADMIN" | "AUTHOR", expiresAt: invite.expiresAt.toISOString() }))} />}
     <AdminPeople people={people} currentUserId={currentUser.id} canManageTeam={currentUser.isSuperAdmin} />
   </>;
