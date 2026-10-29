@@ -157,6 +157,23 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .person-action.destructive{border-color:#f0d5d8;color:#a34f60}
 .person-action.destructive:hover:not(:disabled){background:#fff4f5}
 .people-management-error{margin:0 0 12px}
+.team-delete-dialog{width:min(460px,calc(100vw - 30px));max-width:none;margin:auto;padding:0;border:1px solid #e9e9e3;border-radius:16px;background:#fff;color:var(--ink);box-shadow:0 24px 80px #151e1840;overflow:hidden}
+.team-delete-dialog::backdrop{background:#1d2822a8;backdrop-filter:blur(3px)}
+.team-delete-content{padding:25px}
+.team-delete-icon{display:grid;place-items:center;width:42px;height:42px;margin-bottom:18px;border:1px solid #f0d5d8;border-radius:12px;background:#fff4f5;color:#a34f60}
+.team-delete-content .eyebrow{margin-bottom:7px;color:#a34f60;font-size:9px}
+.team-delete-content h2{margin:0 0 9px;font-size:22px;letter-spacing:-.035em}
+.team-delete-content>p{margin:0;color:#78817b;font-size:12px;line-height:1.65;overflow-wrap:anywhere}
+.team-delete-content>p strong{color:#414c45;font-weight:700}
+.team-delete-impact{display:grid;grid-template-columns:1fr auto;gap:9px 12px;margin-top:19px;padding:13px;border:1px solid #efefe9;border-radius:10px;background:#fbfbf9;font-size:10px}
+.team-delete-impact span{color:#858e87}
+.team-delete-impact strong{text-align:right;color:#46534b;font-size:10px}
+.team-delete-error{margin-top:13px;color:#a34f60;font-size:11px;line-height:1.5}
+.team-delete-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:23px;padding-top:16px;border-top:1px solid #f0f0ec}
+.team-delete-actions .btn{min-height:38px}
+.team-delete-confirm{border:1px solid #a84f5d;background:#b95868;color:#fff}
+.team-delete-confirm:hover:not(:disabled){background:#a84f5d}
+.team-delete-confirm:disabled,.team-delete-actions .btn:disabled{opacity:.6;cursor:wait}
 .people-empty{border-radius:12px}
 .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
 /* Catalog workspace */
