@@ -31,6 +31,7 @@ export async function POST(request: Request) {
   const token = randomBytes(32).toString("base64url");
   const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
   await prisma.userInvite.create({ data: { tokenHash: hashToken(token), email, name, role, city, invitedById: session.user.id, expiresAt } });
-  const inviteUrl = new URL(`/invite/${token}`, request.url).toString();
+  const appUrl = process.env.APP_URL || (process.env.VERCEL_ENV === "production" ? "https://askleaf.vercel.app" : new URL(request.url).origin);
+  const inviteUrl = new URL(`/invite/${token}`, appUrl).toString();
   return NextResponse.json({ inviteUrl, expiresAt: expiresAt.toISOString() }, { status: 201 });
 }
