@@ -113,7 +113,8 @@ export async function draftWithGemini(input: {
     `Subject: ${input.subject}`,
     `Request: ${input.description}`,
   ].filter(Boolean).join("\n");
-  const text = await generate(prompt, `You write customer support replies for BookLeaf Publishing. Return only the ready-to-review reply, with no subject line, analysis, classification, or markdown heading.
+  try {
+    const text = await generate(prompt, `You write customer support replies for BookLeaf Publishing. Return only the ready-to-review reply, with no subject line, analysis, classification, or markdown heading.
 
 Writing rules:
 - Greet the author by first name and acknowledge the specific issue they raised in one natural sentence.
@@ -124,7 +125,10 @@ Writing rules:
 - Sign off simply as “BookLeaf Support”.
 
 Approved policy and general guidance (use only what applies; do not turn typical ranges into a guaranteed completion date):\n${KNOWLEDGE}`);
-  if (text) return { draft: text, source: "GEMINI" as const, model: MODEL };
+    if (text) return { draft: text, source: "GEMINI" as const, model: MODEL };
+  } catch (error) {
+    console.error("Gemini reply drafting failed:", error instanceof Error ? error.message : "unknown error");
+  }
   return { draft: fallbackDraft(input.authorName, input.category, input.bookTitle, input.bookStatus), source: "RULES" as const, model: null };
 }
 
