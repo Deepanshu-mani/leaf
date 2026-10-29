@@ -9,6 +9,7 @@ import { currentSession } from "@/server/auth";
 import { classifyWithGemini } from "@/server/gemini";
 import { listTickets } from "@/server/serializers";
 import { prisma } from "@/lib/prisma";
+import { rateLimit } from "@/lib/rate-limit";
 
 export async function GET() {
   const session = await currentSession();
@@ -22,6 +23,8 @@ export async function POST(request: Request) {
   if (session.user.role !== UserRole.AUTHOR || !session.user.author) {
     return NextResponse.json({ error: "Only authors can open support tickets." }, { status: 403 });
   }
+  const limited = await rateLimit(request, "ticket-create", session.user.id, { limit: 8, windowMs: 60 * 60 * 1000 });
+  if (limited) return limited;
   let body: { subject?: unknown; description?: unknown; bookId?: unknown };
   try { body = await request.json(); } catch { return NextResponse.json({ error: "Enter valid ticket details." }, { status: 400 }); }
   const subject = String(body.subject ?? "").trim();

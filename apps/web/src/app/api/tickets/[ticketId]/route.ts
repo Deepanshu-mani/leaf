@@ -8,6 +8,7 @@ import { currentSession } from "@/server/auth";
 import { listTickets } from "@/server/serializers";
 import { parseCategory, parsePriority, parseStatus } from "@/server/tickets";
 import { prisma } from "@/lib/prisma";
+import { rateLimit } from "@/lib/rate-limit";
 
 export async function GET(_request: Request, context: RouteContext<"/api/tickets/[ticketId]">) {
   const session = await currentSession();
@@ -22,6 +23,8 @@ export async function PATCH(request: Request, context: RouteContext<"/api/ticket
   const session = await currentSession();
   if (!session) return NextResponse.json({ error: "Please sign in to continue." }, { status: 401 });
   if (session.user.role !== UserRole.ADMIN) return NextResponse.json({ error: "Admin access required." }, { status: 403 });
+  const limited = await rateLimit(request, "ticket-update", session.user.id, { limit: 120, windowMs: 60 * 60 * 1000 });
+  if (limited) return limited;
   const { ticketId } = await context.params;
   let body: { status?: unknown; category?: unknown; priority?: unknown; assignedToId?: unknown };
   try { body = await request.json(); } catch { return NextResponse.json({ error: "Invalid update." }, { status: 400 }); }

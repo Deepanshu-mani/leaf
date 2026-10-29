@@ -65,6 +65,8 @@ model User {
   id           String   @id @default(cuid())
   email        String   @unique
   name         String
+  profileImage Bytes?   @map("profile_image")
+  profileImageType String? @map("profile_image_type") @db.VarChar(40)
   passwordHash String   @map("password_hash")
   role         UserRole @default(AUTHOR)
   isActive     Boolean  @default(true) @map("is_active")
@@ -73,6 +75,7 @@ model User {
 
   author          Author?
   sessions        AuthSession[]
+  sentInvites     UserInvite[]     @relation("UserInviter")
   assignedTickets Ticket[]         @relation("TicketAssignee")
   sentMessages    TicketMessage[]
   internalNotes   TicketNote[]
@@ -93,6 +96,25 @@ model AuthSession {
 
   @@index([userId, expiresAt])
   @@map("auth_sessions")
+}
+
+model UserInvite {
+  id          String    @id @default(cuid())
+  tokenHash   String    @unique @map("token_hash")
+  email       String
+  name        String
+  role        UserRole  @default(AUTHOR)
+  city        String?
+  invitedById String   @map("invited_by_id")
+  expiresAt   DateTime @map("expires_at")
+  acceptedAt  DateTime? @map("accepted_at")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  invitedBy User @relation("UserInviter", fields: [invitedById], references: [id], onDelete: Cascade)
+
+  @@index([email, acceptedAt, expiresAt])
+  @@index([invitedById, createdAt])
+  @@map("user_invites")
 }
 
 model Author {

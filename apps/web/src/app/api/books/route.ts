@@ -8,7 +8,7 @@ export async function GET() {
   if (!session) return NextResponse.json({ error: "Please sign in to continue." }, { status: 401 });
   const authors = await prisma.author.findMany({
     where: session.user.role === UserRole.ADMIN ? undefined : { userId: session.user.id },
-    include: { user: true, books: { include: { availability: true }, orderBy: { title: "asc" } } },
+    include: { user: { select: { id: true, name: true, email: true } }, books: { include: { availability: true }, orderBy: { title: "asc" } } },
     orderBy: { user: { name: "asc" } },
   });
   return NextResponse.json({ authors: authors.map((author) => ({

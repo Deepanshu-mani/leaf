@@ -2,11 +2,14 @@ import { NextResponse } from "next/server";
 import { TicketActivityType, UserRole } from "@/generated/prisma/enums";
 import { currentSession } from "@/server/auth";
 import { prisma } from "@/lib/prisma";
+import { rateLimit } from "@/lib/rate-limit";
 
 export async function POST(request: Request, context: RouteContext<"/api/tickets/[ticketId]/notes">) {
   const session = await currentSession();
   if (!session) return NextResponse.json({ error: "Please sign in to continue." }, { status: 401 });
   if (session.user.role !== UserRole.ADMIN) return NextResponse.json({ error: "Admin access required." }, { status: 403 });
+  const limited = await rateLimit(request, "ticket-note", session.user.id, { limit: 120, windowMs: 60 * 60 * 1000 });
+  if (limited) return limited;
   const { ticketId } = await context.params;
   let body: { text?: unknown };
   try { body = await request.json(); } catch { return NextResponse.json({ error: "Enter a valid note." }, { status: 400 }); }

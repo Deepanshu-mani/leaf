@@ -7,13 +7,13 @@ export async function listTickets(userId: string, isAdmin: boolean) {
   const tickets = await prisma.ticket.findMany({
     where: isAdmin ? undefined : { authorId: userId },
     include: {
-      author: { include: { user: true } },
+      author: { include: { user: { select: { id: true, name: true, email: true } } } },
       book: true,
-      assignedTo: true,
-      messages: { include: { sender: true }, orderBy: { createdAt: "asc" } },
-      notes: { include: { author: true }, orderBy: { createdAt: "asc" } },
+      assignedTo: { select: { id: true, name: true } },
+      messages: { include: { sender: { select: { id: true, name: true } } }, orderBy: { createdAt: "asc" } },
+      notes: { include: { author: { select: { id: true, name: true } } }, orderBy: { createdAt: "asc" } },
     },
-    orderBy: [{ createdAt: "desc" }],
+    orderBy: [{ status: "asc" }, { priority: "asc" }, { createdAt: "asc" }],
   });
   return tickets.map((ticket) => ({
     id: ticket.id,
@@ -56,4 +56,13 @@ export async function listTickets(userId: string, isAdmin: boolean) {
       authorName: note.author.name,
     })) : [],
   }));
+}
+
+export async function ticketUpdatesVersion(authorId?: string) {
+  const latest = await prisma.ticketActivity.findFirst({
+    where: authorId ? { ticket: { authorId } } : undefined,
+    orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+    select: { id: true, createdAt: true },
+  });
+  return latest ? `${latest.createdAt.getTime()}-${latest.id}` : "empty";
 }
