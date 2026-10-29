@@ -6,7 +6,7 @@ import {
 } from "@/generated/prisma/enums";
 import { categoryLabels, priorityLabels } from "@/server/tickets";
 
-const MODEL = process.env.GEMINI_MODEL || "gemini-3.6-flash";
+const MODEL = process.env.GEMINI_MODEL || "gemini-2.5-flash";
 const KNOWLEDGE = `COMPANY: BookLeaf Publishing is a self-publishing company operating in India and the US. It offers Standard Free and Bestseller Breakthrough (premium, with marketing and distribution add-ons). BookLeaf handles cover design, typesetting, ISBN assignment, printing, distribution, and royalties. Its in-house facility and warehouse are in Delhi; print partners include Repro India and Epitome Books.
 
 ROYALTIES: The author share is 80% of net profit and BookLeaf's share is 20%. Net profit means MRP minus printing cost, platform commission (such as Amazon or Flipkart), and shipping. Royalties are calculated quarterly and paid within 45 days after quarter-end. The minimum payout is ₹1,000; smaller balances roll over. Payment is by bank transfer to the account linked in the author's dashboard. Authors can view platform sales and royalty breakdowns in their dashboard.

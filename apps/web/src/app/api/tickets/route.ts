@@ -54,7 +54,7 @@ export async function POST(request: Request) {
       aiCategory: classification.source === "GEMINI" ? classification.category : null,
       aiPriority: classification.source === "GEMINI" ? classification.priority : null,
       aiReason: classification.reason,
-      aiModel: classification.source === "GEMINI" ? process.env.GEMINI_MODEL || "gemini-3.8-flash" : null,
+      aiModel: classification.source === "GEMINI" ? process.env.GEMINI_MODEL || "gemini-2.5-flash" : null,
       aiClassifiedAt: classification.source === "GEMINI" ? now : null,
       activities: { create: { actorId: session.user.id, type: TicketActivityType.CREATED, details: { source: classification.source } } },
     },
