@@ -149,6 +149,14 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .person-contact a:hover{color:var(--green);text-decoration:underline}
 .person-metrics{display:flex;flex-wrap:wrap;gap:7px 15px;margin-top:11px;color:#828b84;font-size:10px}
 .person-metrics b{color:#3e4a42}
+.person-role svg{margin-right:4px}
+.person-actions{display:flex;align-items:center;gap:6px;flex-wrap:wrap;justify-content:flex-end;max-width:210px}
+.person-action{display:inline-flex;align-items:center;justify-content:center;gap:5px;min-height:31px;padding:0 9px;border:1px solid var(--line);border-radius:7px;background:#fff;color:#69756e;font-size:9px;font-weight:700;white-space:nowrap}
+.person-action:hover:not(:disabled){border-color:#d6ddd7;background:#fbfbf9}
+.person-action:disabled{opacity:.55}
+.person-action.destructive{border-color:#f0d5d8;color:#a34f60}
+.person-action.destructive:hover:not(:disabled){background:#fff4f5}
+.people-management-error{margin:0 0 12px}
 .people-empty{border-radius:12px}
 .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
 /* Catalog workspace */

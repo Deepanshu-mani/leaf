@@ -87,7 +87,7 @@ async function main() {
 
   await prisma.user.createMany({
     data: [
-      { id: adminId, email: "admin@bookleaf.com", name: "Maya Chen", passwordHash: hashPassword(adminPassword), role: UserRole.ADMIN, createdAt: now, updatedAt: now },
+      { id: adminId, email: "admin@bookleaf.com", name: "Maya Chen", passwordHash: hashPassword(adminPassword), role: UserRole.ADMIN, isSuperAdmin: true, createdAt: now, updatedAt: now },
       ...sample.authors.map((author) => ({ id: author.author_id, email: author.email.toLowerCase(), name: author.name, passwordHash: authorHash, role: UserRole.AUTHOR, createdAt: now, updatedAt: now })),
     ],
     skipDuplicates: true,

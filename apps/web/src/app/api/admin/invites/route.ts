@@ -11,7 +11,7 @@ const hashToken = (token: string) => createHash("sha256").update(token).digest("
 export async function POST(request: Request) {
   const session = await currentSession();
   if (!session) return NextResponse.json({ error: "Please sign in to continue." }, { status: 401 });
-  if (session.user.role !== UserRole.ADMIN) return NextResponse.json({ error: "Admin access required." }, { status: 403 });
+  if (session.user.role !== UserRole.ADMIN || !session.user.isSuperAdmin) return NextResponse.json({ error: "Super admin access required." }, { status: 403 });
   const limited = await rateLimit(request, "invite-create", session.user.id, { limit: 20, windowMs: 60 * 60 * 1000 });
   if (limited) return limited;
 

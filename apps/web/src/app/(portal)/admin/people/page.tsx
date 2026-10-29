@@ -12,7 +12,7 @@ export default async function AdminPeoplePage() {
   if (currentUser.role !== UserRole.ADMIN) redirect("/dashboard");
   const users = await prisma.user.findMany({
     select: {
-      id: true, name: true, email: true, role: true, isActive: true, createdAt: true, profileImageType: true,
+      id: true, name: true, email: true, role: true, isActive: true, isSuperAdmin: true, createdAt: true, profileImageType: true,
       author: { select: { city: true, phone: true, joinedDate: true, _count: { select: { books: true, tickets: true } } } },
       _count: { select: { assignedTickets: true } },
     },
@@ -25,7 +25,7 @@ export default async function AdminPeoplePage() {
     take: 100,
   });
   const people = users.map((user) => ({
-    id: user.id, name: user.name, email: user.email, role: user.role, isActive: user.isActive,
+    id: user.id, name: user.name, email: user.email, role: user.role, isActive: user.isActive, isSuperAdmin: user.isSuperAdmin,
     joinedAt: (user.author?.joinedDate ?? user.createdAt).toISOString(), profileImageType: user.profileImageType,
     city: user.author?.city ?? null, phone: user.author?.phone ?? null,
     books: user.author?._count.books ?? 0, tickets: user.author?._count.tickets ?? 0,
@@ -35,10 +35,10 @@ export default async function AdminPeoplePage() {
   const authorCount = people.filter((person) => person.role === UserRole.AUTHOR).length;
   const inactiveCount = people.filter((person) => !person.isActive).length;
   return <>
-    <div className="pagehead"><div><div className="eyebrow">BOOKLEAF OPERATIONS</div><h1>People</h1><p>Manage your publishing community and invite people into their workspace.</p></div></div>
-    <div className="stat-grid"><Stat icon={<UserRound />} label="Authors" value={authorCount} sub="Author accounts" /><Stat icon={<UsersRound />} label="Team members" value={teamCount} sub="Internal support team" /><Stat icon={<BookOpen />} label="Active accounts" value={people.length - inactiveCount} sub="Across the directory" /><Stat icon={<Headset />} label="Support tickets" value={people.reduce((sum, person) => sum + person.tickets, 0)} sub="Submitted by authors" /></div>
-    <AdminInvitePanel initialInvites={pendingInvites.map((invite) => ({ ...invite, role: invite.role as "ADMIN" | "AUTHOR", expiresAt: invite.expiresAt.toISOString() }))} />
-    <AdminPeople people={people} />
+    <div className="pagehead"><div><div className="eyebrow">BOOKLEAF OPERATIONS</div><h1>People</h1><p>{currentUser.isSuperAdmin ? "Manage access, invite people, and oversee your publishing community." : "View your publishing community and internal team."}</p></div></div>
+    <div className="stat-grid"><Stat icon={<UserRound />} label="Authors" value={authorCount} sub="Author accounts" /><Stat icon={<UsersRound />} label="Admins" value={teamCount} sub="Including the super admin" /><Stat icon={<BookOpen />} label="Active accounts" value={people.length - inactiveCount} sub="Across the directory" /><Stat icon={<Headset />} label="Support tickets" value={people.reduce((sum, person) => sum + person.tickets, 0)} sub="Submitted by authors" /></div>
+    {currentUser.isSuperAdmin && <AdminInvitePanel initialInvites={pendingInvites.map((invite) => ({ ...invite, role: invite.role as "ADMIN" | "AUTHOR", expiresAt: invite.expiresAt.toISOString() }))} />}
+    <AdminPeople people={people} currentUserId={currentUser.id} canManageTeam={currentUser.isSuperAdmin} />
   </>;
 }
 function Stat({ icon, label, value, sub }: { icon: ReactNode; label: string; value: number; sub: string }) { return <div className="stat"><div className="stat-label">{label}<span className="queue-stat-icon">{icon}</span></div><div className="stat-value">{value}</div><div className="stat-sub">{sub}</div></div>; }

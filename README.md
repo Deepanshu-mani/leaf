@@ -54,8 +54,10 @@ Routes require a valid session cookie except sign-in and invite acceptance. Auth
 | `GET` | `/api/users/{userId}/avatar` | Read an avatar for the owner or an admin |
 | `POST` | `/api/users/{userId}/avatar` | Upload an avatar as multipart field `image` (owner only; JPG/PNG/WebP, 2 MB max) |
 | `DELETE` | `/api/users/{userId}/avatar` | Remove the caller's avatar |
-| `POST` | `/api/admin/invites` | Create an author or admin invite (admin; link is copied/shared manually) |
-| `DELETE` | `/api/admin/invites/{inviteId}` | Revoke a pending invite (admin) |
+| `POST` | `/api/admin/invites` | Create an author or admin invite (super admin; link is copied/shared manually) |
+| `DELETE` | `/api/admin/invites/{inviteId}` | Revoke a pending invite (super admin) |
+| `PATCH` | `/api/admin/users/{userId}` | Activate or deactivate an internal team account (super admin) |
+| `DELETE` | `/api/admin/users/{userId}` | Permanently delete an inactive team account when its authored replies/notes can be preserved (super admin) |
 | `POST` | `/api/auth/accept-invite` | Accept an invite and create the account |
 
 Errors return JSON with an `error` message and an appropriate HTTP status. Profile images are stored in Postgres and served only through the authenticated avatar endpoint.
@@ -90,7 +92,7 @@ The app is deployed on Vercel with its environment configured. The canonical pro
 - **Admin portal:** ticket queue with status/category/priority/date filters, priority-based sorting, assignment, internal notes, staff replies, and book and people catalogs.
 - **AI:** Gemini ticket categorization and priority suggestions plus reply drafts grounded in the BookLeaf policy context. Staff can override classification and edit drafts. Rules-based classification and templates keep the workflow available when Gemini is unavailable.
 - **Data and API:** Next.js REST route handlers, Prisma ORM, Neon Postgres, the supplied dataset, validation, and role-based authorization. Endpoint details are listed above.
-- **Team access:** admin-issued invitation links create author or admin accounts; admins copy and share links manually.
+- **Team access:** Maya Chen (`admin@bookleaf.com`) is the sole super admin. Only she can issue/revoke invitations or manage internal team accounts. She can deactivate/reactivate a team member, or permanently delete a deactivated account when historical replies and notes do not prevent safe removal; deleted email addresses become available for a new invite.
 - **Profile photos:** JPG/PNG/WebP only, maximum 2 MB, validated by file signature and stored in Postgres.
 - **Operations:** Vercel deployment, 10-second activity polling, and database-backed fixed-window rate limits keyed by hashed IP and account identifiers.
 - **UI:** Radix-based ShadCN-style controls and Lucide icons, with the existing BookLeaf visual theme. The components are locally styled wrappers, not a full shadcn/ui CLI installation.
