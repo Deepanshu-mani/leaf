@@ -78,7 +78,7 @@ The data model keeps author profiles and login accounts separate, normalizes boo
 
 ## Architecture and AI
 
-Next.js route handlers provide the REST API and server-side authorization. Prisma ORM 7 connects to Neon Postgres with a pooled runtime URL and a direct migration URL. Gemini receives only the selected ticket and relevant account/book facts plus the BookLeaf policy context; staff review and edit every draft before sending. If Gemini is unavailable, the workflow remains usable with rules-based classification and category-specific draft templates. See [docs/APPROACH.md](docs/APPROACH.md) for the approach and current trade-offs.
+Next.js route handlers provide the REST API and server-side authorization. Prisma ORM 7 connects to Neon Postgres with a pooled runtime URL and a direct migration URL. Gemini receives only the selected ticket and relevant account/book facts plus the BookLeaf policy context; staff review and edit every draft before sending. If Gemini is unavailable, the workflow remains usable with rules-based classification and category-specific draft templates. See [APPROACH.md](APPROACH.md) for the approach and current trade-offs.
 
 ## Deployment and known gaps
 
@@ -110,4 +110,4 @@ The assignment’s core author-support loop and AI workflow are implemented. The
 
 ## Sample data and assignment brief
 
-The supplied dataset is `apps/web/prisma/seed-data/bookleaf_sample_data.json`; the confidential assignment brief is `docs/BookLeaf_Technical_Assignment_1.pdf`. The duplicate dataset and unused pre-Next.js prototype have been removed. Keep the repository private as required by the assignment. See [the design system notes](docs/DESIGN_SYSTEM.md) and [approach write-up](docs/APPROACH.md).
+The supplied dataset is `apps/web/prisma/seed-data/bookleaf_sample_data.json`. The assignment brief and internal design notes are not included in this repository. The duplicate dataset and unused pre-Next.js prototype have been removed. See [the approach write-up](APPROACH.md).
