@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { UserRole } from "@/generated/prisma/enums";
 import { prisma } from "@/lib/prisma";
 import { rateLimit } from "@/lib/rate-limit";
+import { getSiteUrl } from "@/lib/site-url";
 import { currentSession } from "@/server/auth";
 
 const hashToken = (token: string) => createHash("sha256").update(token).digest("hex");
@@ -31,7 +32,6 @@ export async function POST(request: Request) {
   const token = randomBytes(32).toString("base64url");
   const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
   await prisma.userInvite.create({ data: { tokenHash: hashToken(token), email, name, role, city, invitedById: session.user.id, expiresAt } });
-  const appUrl = process.env.APP_URL || (process.env.VERCEL_ENV === "production" ? "https://askleaf.vercel.app" : new URL(request.url).origin);
-  const inviteUrl = new URL(`/invite/${token}`, appUrl).toString();
+  const inviteUrl = new URL(`/invite/${token}`, getSiteUrl(request.url)).toString();
   return NextResponse.json({ inviteUrl, expiresAt: expiresAt.toISOString() }, { status: 201 });
 }
